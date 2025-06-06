@@ -45,8 +45,8 @@ if uploaded_file and openai_key and elevenlabs_key:
                 company_name = str(row.get("Company name", "")).strip()
                 job_description = str(row.get("Description", "")).strip()
 
-                # GPT-generated intro
-
+                
+# GPT-generated intro
 if generate_gpt_intro and job_description:
     try:
         prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
@@ -60,6 +60,7 @@ if generate_gpt_intro and job_description:
         st.error(f"❌ GPT Error for {first_name}: {e}")
 else:
     gpt_intro = ""
+
 
                 
 
