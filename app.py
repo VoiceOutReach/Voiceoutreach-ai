@@ -23,6 +23,20 @@ template = st.text_area(
 generate_gpt_intro = st.checkbox("✨ Auto-generate first sentence using job description?", value=True)
 uploaded_file = st.file_uploader("📤 Upload Leads CSV", type=["csv"])
 
+#csv template
+sample_csv = """First Name,Position,Hiring for Job Title,Company name,Description
+Alice,Founder,Video Editor,MediaCorp,"We’re looking for a creative video editor to join our team."
+Bob,Head of Product,UI/UX Designer,Designly,"Seeking a UX designer passionate about user-centric design."
+"""
+
+st.download_button(
+    label="📥 Download Sample CSV Format",
+    data=sample_csv,
+    file_name="sample_leads_template.csv",
+    mime="text/csv"
+)
+
+
 # Process if file is uploaded
 if uploaded_file and openai_key and elevenlabs_key:
     df = pd.read_csv(uploaded_file)
@@ -96,6 +110,8 @@ if uploaded_file and openai_key and elevenlabs_key:
                 })
 
                 st.success(f"🎧 Voice note generated for {first_name}")
+                st.audio(audio_path, format="audio/mp3")
+
 
             except Exception as e:
                 st.error(f"❌ Error for row {index + 1}: {e}")
