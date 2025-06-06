@@ -46,7 +46,8 @@ if uploaded_file and openai_key and elevenlabs_key:
                 job_description = str(row.get("Description", "")).strip()
 
                 # GPT-generated intro
-                if generate_gpt_intro and job_description:
+
+if generate_gpt_intro and job_description:
     prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
     try:
         response = openai.ChatCompletion.create(
@@ -60,6 +61,7 @@ if uploaded_file and openai_key and elevenlabs_key:
 else:
     gpt_intro = ""
 
+                
 
                 # ElevenLabs voice generation
                 tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
