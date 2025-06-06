@@ -57,15 +57,9 @@ if uploaded_file and openai_key and elevenlabs_key:
     except Exception as e:
         gpt_intro = "(GPT intro failed)"
         st.error(f"❌ GPT Error for {first_name}: {e}")
+else:
+    gpt_intro = ""
 
-                # Fill template
-                message = template.format(
-                    first_name=first_name,
-                    position=position,
-                    job_title=job_title,
-                    company_name=company_name,
-                    gpt_intro=gpt_intro
-                )
 
                 # ElevenLabs voice generation
                 tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
