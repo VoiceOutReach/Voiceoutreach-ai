@@ -46,18 +46,17 @@ if uploaded_file and openai_key and elevenlabs_key:
                 job_description = str(row.get("Description", "")).strip()
 
                 # GPT-generated intro
-                gpt_intro = ""
                 if generate_gpt_intro and job_description:
-                    prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
-                    try:
-                       response = openai.ChatCompletion.create(
-                            model="gpt-3.5-turbo",
-                            messages=[{"role": "user", "content": prompt}]
-                        )
-                        gpt_intro = response.choices[0].message.content.strip() 
-                    except Exception as e:
-                        gpt_intro = "(GPT intro failed)"
-                        st.error(f"❌ GPT Error for {first_name}: {e}")
+    prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        gpt_intro = response.choices[0].message.content.strip()
+    except Exception as e:
+        gpt_intro = "(GPT intro failed)"
+        st.error(f"❌ GPT Error for {first_name}: {e}")
 
                 # Fill template
                 message = template.format(
