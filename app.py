@@ -50,7 +50,7 @@ if uploaded_file and openai_key and elevenlabs_key:
                 if generate_gpt_intro and job_description:
                     prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
                     try:
-                        response = client.chat.completions.create(
+                       response = openai.ChatCompletion.create(
                             model="gpt-3.5-turbo",
                             messages=[{"role": "user", "content": prompt}]
                         )
