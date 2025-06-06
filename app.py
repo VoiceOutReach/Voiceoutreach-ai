@@ -5,7 +5,6 @@ import io
 import zipfile
 import openai
 import requests
-from tempfile import NamedTemporaryFile
 
 # Streamlit UI
 st.set_page_config(page_title="VoiceOutReach.ai", layout="centered")
@@ -22,7 +21,6 @@ template = st.text_area(
 )
 
 generate_gpt_intro = st.checkbox("✨ Auto-generate first sentence using job description?", value=True)
-
 uploaded_file = st.file_uploader("📤 Upload Leads CSV", type=["csv"])
 
 # Process if file is uploaded
@@ -45,24 +43,29 @@ if uploaded_file and openai_key and elevenlabs_key:
                 company_name = str(row.get("Company name", "")).strip()
                 job_description = str(row.get("Description", "")).strip()
 
-                
-# GPT-generated intro
-if generate_gpt_intro and job_description:
-    try:
-        prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        gpt_intro = response.choices[0].message.content.strip()
-    except Exception as e:
-        gpt_intro = "(GPT intro failed)"
-        st.error(f"❌ GPT Error for {first_name}: {e}")
-else:
-    gpt_intro = ""
+                # GPT-generated intro
+                if generate_gpt_intro and job_description:
+                    try:
+                        prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
+                        response = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": prompt}]
+                        )
+                        gpt_intro = response.choices[0].message.content.strip()
+                    except Exception as e:
+                        gpt_intro = "(GPT intro failed)"
+                        st.error(f"❌ GPT Error for {first_name}: {e}")
+                else:
+                    gpt_intro = ""
 
-
-                
+                # Fill message template
+                message = template.format(
+                    first_name=first_name,
+                    position=position,
+                    job_title=job_title,
+                    company_name=company_name,
+                    gpt_intro=gpt_intro
+                )
 
                 # ElevenLabs voice generation
                 tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
@@ -113,3 +116,4 @@ else:
 
 else:
     st.info("👆 Please upload a CSV file and enter your API keys to get started.")
+
