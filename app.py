@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import io
 import zipfile
-from openai import OpenAI
+import openai
 import requests
 from tempfile import NamedTemporaryFile
 
