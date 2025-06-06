@@ -21,14 +21,28 @@ template = st.text_area(
 )
 
 generate_gpt_intro = st.checkbox("✨ Auto-generate first sentence using job description?", value=True)
-uploaded_file = st.file_uploader("📤 Upload Leads CSV", type=["csv"])
 
-#csv template
+# --- Follow-up Controls ---
+generate_followup = st.checkbox("🔁 Generate Follow-Up Message?", value=False)
+
+followup_template = st.text_area(
+    "📄 Follow-Up Template",
+    "Hey {first_name}, just following up on my last message about {job_title}. Would love to connect!",
+    disabled=not generate_followup
+)
+
+followup_delay = st.selectbox(
+    "⏳ Follow-up Delay (in days)",
+    options=[i for i in range(1, 11)],
+    index=2,
+    disabled=not generate_followup
+)
+
+# --- Sample CSV download ---
 sample_csv = """First Name,Position,Hiring for Job Title,Company name,Description
 Alice,Founder,Video Editor,MediaCorp,"We’re looking for a creative video editor to join our team."
 Bob,Head of Product,UI/UX Designer,Designly,"Seeking a UX designer passionate about user-centric design."
 """
-
 st.download_button(
     label="📥 Download Sample CSV Format",
     data=sample_csv,
@@ -36,8 +50,10 @@ st.download_button(
     mime="text/csv"
 )
 
+# --- File Upload ---
+uploaded_file = st.file_uploader("📤 Upload Leads CSV", type=["csv"])
 
-# Process if file is uploaded
+# --- Processing ---
 if uploaded_file and openai_key and elevenlabs_key:
     df = pd.read_csv(uploaded_file)
     st.success("✅ File uploaded. Ready to generate messages.")
@@ -57,7 +73,7 @@ if uploaded_file and openai_key and elevenlabs_key:
                 company_name = str(row.get("Company name", "")).strip()
                 job_description = str(row.get("Description", "")).strip()
 
-                # GPT-generated intro
+                # --- GPT intro ---
                 if generate_gpt_intro and job_description:
                     try:
                         prompt = f"Write a professional, attention-grabbing 1-sentence opening based on this job description:\n\n{job_description}"
@@ -72,7 +88,7 @@ if uploaded_file and openai_key and elevenlabs_key:
                 else:
                     gpt_intro = ""
 
-                # Fill message template
+                # --- Main message ---
                 message = template.format(
                     first_name=first_name,
                     position=position,
@@ -101,28 +117,54 @@ if uploaded_file and openai_key and elevenlabs_key:
                 with open(audio_path, "wb") as f:
                     f.write(response.content)
 
+                st.success(f"🎧 Voice note generated for {first_name}")
+                st.audio(audio_path, format="audio/mp3")
+
+                # --- Follow-Up ---
+                followup_message = ""
+                followup_audio_path = ""
+
+                if generate_followup:
+                    followup_message = followup_template.format(
+                        first_name=first_name,
+                        position=position,
+                        job_title=job_title,
+                        company_name=company_name,
+                        gpt_intro=""
+                    )
+
+                    tts_payload["text"] = followup_message
+                    response = requests.post(tts_url, headers=headers, json=tts_payload)
+
+                    followup_audio_path = f"{output_dir}/{first_name}_{job_title}_followup.mp3"
+                    with open(followup_audio_path, "wb") as f:
+                        f.write(response.content)
+
+                    st.success(f"📨 Follow-up voice note generated for {first_name} (send in {followup_delay} days)")
+                    st.audio(followup_audio_path, format="audio/mp3")
+
+                # --- Save to results ---
                 results.append({
                     "Name": first_name,
                     "Position": position,
                     "Job Title": job_title,
                     "Message": message,
-                    "Voice File": os.path.basename(audio_path)
+                    "Voice File": os.path.basename(audio_path),
+                    "Follow-Up Message": followup_message,
+                    "Follow-Up File": os.path.basename(followup_audio_path) if followup_audio_path else "",
+                    "Follow-Up Delay (Days)": followup_delay if generate_followup else ""
                 })
-
-                st.success(f"🎧 Voice note generated for {first_name}")
-                st.audio(audio_path, format="audio/mp3")
-
 
             except Exception as e:
                 st.error(f"❌ Error for row {index + 1}: {e}")
 
-        # Save messages to CSV
+        # --- Save messages to CSV ---
         results_df = pd.DataFrame(results)
         csv_buffer = io.StringIO()
         results_df.to_csv(csv_buffer, index=False)
         st.download_button("📄 Download Message CSV", data=csv_buffer.getvalue(), file_name="generated_messages.csv", mime="text/csv")
 
-        # Zip audio files
+        # --- Zip audio files ---
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w") as zipf:
             for file in os.listdir(output_dir):
@@ -132,4 +174,3 @@ if uploaded_file and openai_key and elevenlabs_key:
 
 else:
     st.info("👆 Please upload a CSV file and enter your API keys to get started.")
-
