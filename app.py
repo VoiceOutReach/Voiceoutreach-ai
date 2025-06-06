@@ -33,7 +33,7 @@ if uploaded_file and openai_key and elevenlabs_key:
     if st.button("🚀 Generate Voice Notes"):
         output_dir = "voice_notes"
         os.makedirs(output_dir, exist_ok=True)
-        client = OpenAI(api_key=openai_key)
+        openai.api_key = openai_key
 
         results = []
 
