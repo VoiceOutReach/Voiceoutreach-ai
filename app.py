@@ -54,7 +54,7 @@ if uploaded_file and openai_key and elevenlabs_key:
                             model="gpt-3.5-turbo",
                             messages=[{"role": "user", "content": prompt}]
                         )
-                        gpt_intro = response.choices[0].message.content.strip()
+                        gpt_intro = response.choices[0].message.content.strip() 
                     except Exception as e:
                         gpt_intro = "(GPT intro failed)"
                         st.error(f"❌ GPT Error for {first_name}: {e}")
