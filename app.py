@@ -7,8 +7,7 @@ import openai
 import requests
 
 st.set_page_config(page_title="VoiceOutReach.ai", layout="centered")
-st.title("🎙️ VoiceOutReach.ai - AI Voice Note Generator for LinkedIn Outreach")
-
+st.title("🎙️ VoiceOutReach.ai v2 – Now with Preview & Variable Suggestions 🚀")
 # --- API Keys ---
 openai_key = st.text_input("🔑 OpenAI API Key", type="password")
 elevenlabs_key = st.text_input("🎤 ElevenLabs API Key", type="password")
